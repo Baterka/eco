@@ -1,0 +1,39 @@
+/**
+ * Remote deploy
+ */
+
+// Load `local.properties` file
+Properties localProperties = new Properties()
+def propertiesFile = project.rootProject.file('local.properties')
+if (propertiesFile.exists()) localProperties.load(propertiesFile.newDataInputStream())
+
+def remoteDeployHost = localProperties['remote.deploy.host'] as String
+def remoteDeployUser = localProperties['remote.deploy.user'] as String
+def remoteDeployPassword = localProperties['remote.deploy.password'] as String
+def remoteDeployPath = localProperties['remote.deploy.path'] as String
+
+if (remoteDeployHost && remoteDeployUser && remoteDeployPassword && remoteDeployPath) {
+    ssh.settings {
+        knownHosts = allowAnyHosts
+    }
+
+    remotes {
+        webServer {
+            host = remoteDeployHost
+            user = remoteDeployUser
+            password = remoteDeployPassword
+        }
+    }
+
+    tasks.register('deploy') {
+        doLast {
+            ssh.run {
+                session(remotes.webServer) {
+                    put from: shadowJar.archiveFile.get().asFile.path, into: remoteDeployPath
+                }
+            }
+        }
+    }
+
+    deploy.dependsOn shadowJar
+}

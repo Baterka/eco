@@ -14,22 +14,32 @@ import org.bukkit.event.block.BlockPistonRetractEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.world.StructureGrowEvent
 import org.bukkit.persistence.PersistentDataType
+import java.nio.ByteBuffer
+import java.util.*
+
+fun UUID.toByteArray(): ByteArray {
+    val buffer = ByteBuffer.allocate(Long.SIZE_BYTES * 2)
+    buffer.putLong(this.mostSignificantBits)
+    buffer.putLong(this.leastSignificantBits)
+    return buffer.array()
+}
 
 class PlayerBlockListener(
     private val plugin: EcoPlugin
 ) : Listener {
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onPlace(event: BlockPlaceEvent) {
         val block = event.blockPlaced
 
-        writeKey(block)
+        writeKey(block, event.player.uniqueId)
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onPlace(event: BlockMultiPlaceEvent) {
         val block = event.blockPlaced
 
-        writeKey(block)
+        writeKey(block, event.player.uniqueId)
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -68,7 +78,7 @@ class PlayerBlockListener(
             }
 
             for (loc in locs) {
-                writeKey(loc)
+                writeKey(loc, null)
             }
         }
     }
@@ -91,21 +101,21 @@ class PlayerBlockListener(
             }
 
             for (loc in locs) {
-                writeKey(loc)
+                writeKey(loc, null)
             }
         }
     }
 
-    private fun writeKey(block: Block) {
-        writeKey(block.location)
+    private fun writeKey(block: Block, uuid: UUID) {
+        writeKey(block.location, uuid)
     }
 
-    private fun writeKey(location: Location) {
+    private fun writeKey(location: Location, uuid: UUID?) {
         val loc = location.hashCode().toString(16)
         location.chunk.persistentDataContainer.set(
             plugin.createNamespacedKey(loc.lowercase()),
-            PersistentDataType.INTEGER,
-            1
+            PersistentDataType.BYTE_ARRAY,
+            uuid?.toByteArray() ?: byteArrayOf()
         )
     }
 

@@ -10,9 +10,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Utilities / API methods for blocks.
@@ -94,7 +97,30 @@ public final class BlockUtils {
 
         return chunk.getPersistentDataContainer().has(
                 NamespacedKeyUtils.createEcoKey(Integer.toString(block.getLocation().hashCode(), 16)),
-                PersistentDataType.INTEGER
+                PersistentDataType.BYTE_ARRAY
+        );
+    }
+
+    /**
+     * Get what player placed this block (if any)
+     *
+     * @param block The block.
+     * @return UUID of player, who placed the block.
+     */
+    public static UUID whoPlaced(@NotNull final Block block) {
+        Chunk chunk = block.getChunk();
+
+        byte[] uuid = chunk.getPersistentDataContainer().get(
+                NamespacedKeyUtils.createEcoKey(Integer.toString(block.getLocation().hashCode(), 16)),
+                PersistentDataType.BYTE_ARRAY
+        );
+
+        if (uuid == null)
+            return null;
+
+        return new UUID(
+                ByteBuffer.wrap(Arrays.copyOfRange(uuid, 0, 8)).getLong(),
+                ByteBuffer.wrap(Arrays.copyOfRange(uuid, 8, 16)).getLong()
         );
     }
 

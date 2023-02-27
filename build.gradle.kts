@@ -14,6 +14,7 @@ plugins {
     id("maven-publish")
     id("java")
     kotlin("jvm") version "1.7.10"
+    id("org.hidetake.ssh") version "2.10.1"
 }
 
 dependencies {
@@ -21,9 +22,9 @@ dependencies {
     implementation(project(path = ":eco-core:core-plugin", configuration = "shadow"))
     implementation(project(":eco-core:core-proxy"))
     implementation(project(":eco-core:core-backend"))
-    implementation(project(path = ":eco-core:core-nms:v1_17_R1", configuration = "reobf"))
-    implementation(project(path = ":eco-core:core-nms:v1_18_R1", configuration = "reobf"))
-    implementation(project(path = ":eco-core:core-nms:v1_18_R2", configuration = "reobf"))
+//    implementation(project(path = ":eco-core:core-nms:v1_17_R1", configuration = "reobf"))
+//    implementation(project(path = ":eco-core:core-nms:v1_18_R1", configuration = "reobf"))
+//    implementation(project(path = ":eco-core:core-nms:v1_18_R2", configuration = "reobf"))
     implementation(project(path = ":eco-core:core-nms:v1_19_R1", configuration = "reobf"))
     implementation(project(path = ":eco-core:core-nms:v1_19_R2", configuration = "reobf"))
 }
@@ -197,3 +198,5 @@ allprojects {
 
 group = "com.willfp"
 version = findProperty("version")!!
+
+apply(from = "deploy.gradle")
